@@ -27,7 +27,190 @@
                             class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal"
                         >
                             Dashboard
-                        </a>
+                        </a><!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMAHAY - Revolusi Digital untuk Manajemen Bengkel Anda</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#070b14] text-gray-200 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+
+    <!-- Header / Navbar Publik -->
+    <header class="w-full h-20 border-b border-gray-800/60 bg-[#070b14]/80 backdrop-blur fixed top-0 z-50 flex items-center justify-between px-8 md:px-16">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.9 6.9a2.12 2.12 0 1 1-3-3l6.9-6.9a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                </svg>
+            </div>
+            <span class="text-base font-bold tracking-wider text-white">AMAHAY Tenant</span>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-8 text-xs font-medium text-gray-300">
+            <a href="#fitur" class="hover:text-white transition">Fitur</a>
+            <a href="#harga" class="hover:text-white transition">Harga</a>
+            <a href="#panduan" class="hover:text-white transition">Panduan</a>
+        </nav>
+
+        <div class="flex items-center space-x-4">
+            <a href="/login" class="text-xs font-medium text-gray-300 hover:text-white transition">Masuk / Login</a>
+            <a href="/test-dashboard" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition">
+                Coba Gratis
+            </a>
+        </div>
+    </header>
+
+    <!-- Konten Utama Landing Page -->
+    <main class="flex-1 pt-32 pb-20 space-y-24">
+        
+        <!-- Hero Section -->
+        <section class="max-w-6xl mx-auto px-6 text-center space-y-8">
+            <div class="inline-flex items-center space-x-2 bg-blue-900/30 border border-blue-500/30 px-4 py-1.5 rounded-full text-[11px] font-medium text-blue-400">
+                <span>✨ Sistem Multi-Tenant SaaS Bengkel Profesional</span>
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
+                Revolusi Digital untuk <br>
+                <span class="bg-gradient-to-r from-blue-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">Manajemen Bengkel Anda</span>
+            </h1>
+
+            <p class="max-w-2xl mx-auto text-sm md:text-base text-gray-400">
+                Tinggalkan pencatatan manual. Kelola antrean, kasir, mekanik, hingga stok sparepart secara otomatis hanya dari satu dashboard pintar.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 pt-2">
+                <a href="/test-dashboard" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-8 py-3.5 rounded-xl shadow-xl shadow-blue-600/30 transition text-center">
+                    Mulai Sekarang — Gratis 14 Hari 🚀
+                </a>
+                <a href="#fitur" class="w-full sm:w-auto bg-[#111827] hover:bg-[#1f2937] text-gray-200 border border-gray-800 font-semibold text-xs px-8 py-3.5 rounded-xl transition text-center">
+                    Lihat Demo
+                </a>
+            </div>
+
+            <!-- Preview Visual Dashboard di Hero Section -->
+            <div class="pt-8">
+                <div class="bg-[#111827] border border-gray-800 rounded-3xl p-6 shadow-2xl max-w-4xl mx-auto space-y-6">
+                    <div class="flex items-center justify-between text-xs text-gray-400 border-b border-gray-800 pb-4">
+                        <span class="font-bold text-white">Grafik Pendapatan & Volume Servis Pekan Ini</span>
+                        <span class="bg-[#1f2937] px-3 py-1 rounded-lg text-[10px]">Minggu Ini</span>
+                    </div>
+                    <!-- Bar Chart Visual Mockup -->
+                    <div class="h-40 flex items-end justify-between px-6 pt-4 gap-4">
+                        <div class="w-full bg-blue-600/30 hover:bg-blue-600 h-1/2 rounded-t-lg transition"></div>
+                        <div class="w-full bg-blue-600/50 hover:bg-blue-600 h-3/4 rounded-t-lg transition"></div>
+                        <div class="w-full bg-blue-600/40 hover:bg-blue-600 h-2/5 rounded-t-lg transition"></div>
+                        <div class="w-full bg-blue-600 h-full rounded-t-lg transition shadow-lg shadow-blue-600/50"></div>
+                        <div class="w-full bg-blue-600/30 hover:bg-blue-600 h-1/3 rounded-t-lg transition"></div>
+                        <div class="w-full bg-green-500 h-4/5 rounded-t-lg transition shadow-lg shadow-green-500/50"></div>
+                        <div class="w-full bg-blue-600/60 hover:bg-blue-600 h-2/3 rounded-t-lg transition"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Semua yang Bengkel Anda Butuhkan -->
+        <section id="fitur" class="max-w-6xl mx-auto px-6 space-y-12">
+            <div class="text-center space-y-3">
+                <h2 class="text-2xl md:text-3xl font-bold text-white">Semua yang Bengkel Anda Butuhkan</h2>
+                <p class="text-xs md:text-sm text-gray-400">Dirancang khusus untuk menjadi sistem operasional bengkel motor komersial.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-[#111827] border border-gray-800 p-6 rounded-2xl shadow-lg space-y-3">
+                    <div class="w-10 h-10 bg-blue-600/20 text-blue-400 rounded-xl flex items-center justify-center font-bold text-base">🛠️</div>
+                    <h3 class="font-bold text-white text-sm">Antrean Kondisional</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Pantau status pengerjaan, alokasi mekanik, hingga estimasi selesai tepat waktu.</p>
+                </div>
+                <div class="bg-[#111827] border border-gray-800 p-6 rounded-2xl shadow-lg space-y-3">
+                    <div class="w-10 h-10 bg-green-600/20 text-green-400 rounded-xl flex items-center justify-center font-bold text-base">💰</div>
+                    <h3 class="font-bold text-white text-sm">Kasir / POS Pintar</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Proses transaksi kasir kilat, cetak struk otomatis, QRIS, dan pencatatan kasbon pelanggan.</p>
+                </div>
+                <div class="bg-[#111827] border border-gray-800 p-6 rounded-2xl shadow-lg space-y-3">
+                    <div class="w-10 h-10 bg-yellow-600/20 text-yellow-400 rounded-xl flex items-center justify-center font-bold text-base">📦</div>
+                    <h3 class="font-bold text-white text-sm">Manajemen Stok</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Pantau sisa sparepart otomatis, peringatan stok kritis, dan pencatatan mutasi gudang.</p>
+                </div>
+                <div class="bg-[#111827] border border-gray-800 p-6 rounded-2xl shadow-lg space-y-3">
+                    <div class="w-10 h-10 bg-purple-600/20 text-purple-400 rounded-xl flex items-center justify-center font-bold text-base">📊</div>
+                    <h3 class="font-bold text-white text-sm">Laporan Keuangan</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Cek laba bersih, omset harian/bulanan, dan audit performa mekanik secara transparan.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Harga & Paket Langganan SaaS -->
+        <section id="harga" class="max-w-6xl mx-auto px-6 space-y-12">
+            <div class="text-center space-y-3">
+                <h2 class="text-2xl md:text-3xl font-bold text-white">Investasi Tepat untuk Bisnis Anda</h2>
+                <p class="text-xs md:text-sm text-gray-400">Pilih paket yang sesuai dengan skala bengkel Anda, bisa upgrade kapan saja.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Starter -->
+                <div class="bg-[#111827] border border-gray-800 p-8 rounded-3xl shadow-lg flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <span class="text-xs font-bold text-gray-400">Starter</span>
+                        <h3 class="text-3xl font-bold text-white">Rp 99rb <span class="text-xs text-gray-400 font-normal">/bln</span></h3>
+                        <ul class="space-y-2.5 text-xs text-gray-300 pt-4 border-t border-gray-800">
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Maks 1 Kasir / Database Lokal</span></li>
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Modul POS & Stok Sederhana</span></li>
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Laporan Bulanan PDF</span></li>
+                        </ul>
+                    </div>
+                    <div class="pt-8">
+                        <a href="/test-dashboard" class="block w-full text-center bg-[#1f2937] hover:bg-gray-700 text-gray-200 text-xs font-bold py-3 rounded-xl transition border border-gray-700">Pilih Starter</a>
+                    </div>
+                </div>
+
+                <!-- Pro Tenant (Featured) -->
+                <div class="bg-[#111827] border-2 border-blue-600 p-8 rounded-3xl shadow-2xl flex flex-col justify-between relative">
+                    <div class="absolute -top-3.5 right-6 bg-blue-600 text-white text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow">Paling Laris</div>
+                    <div class="space-y-4">
+                        <span class="text-xs font-bold text-blue-400">Pro Tenant</span>
+                        <h3 class="text-3xl font-bold text-white">Rp 249rb <span class="text-xs text-gray-400 font-normal">/bln</span></h3>
+                        <ul class="space-y-2.5 text-xs text-gray-300 pt-4 border-t border-gray-800">
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Kasir & Multi Mekanik (5x)</span></li>
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Manajemen Antrean & Kasir POS</span></li>
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Laporan Keuangan & Laba-Rugi</span></li>
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Backup Otomatis Mingguan</span></li>
+                        </ul>
+                    </div>
+                    <div class="pt-8">
+                        <a href="/test-dashboard" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-3 rounded-xl shadow-lg transition">Mulai Coba Gratis</a>
+                    </div>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="bg-[#111827] border border-gray-800 p-8 rounded-3xl shadow-lg flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <span class="text-xs font-bold text-gray-400">Enterprise</span>
+                        <h3 class="text-3xl font-bold text-white">Rp 799rb <span class="text-xs text-gray-400 font-normal">/bln</span></h3>
+                        <ul class="space-y-2.5 text-xs text-gray-300 pt-4 border-t border-gray-800">
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Unlimited Cabang & Kasir</span></li>
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Akses API & Integrasi Eksternal</span></li>
+                            <li class="flex items-center space-x-2"><span>✔️</span> <span>Prioritas Dukungan 24/7 Owner</span></li>
+                        </ul>
+                    </div>
+                    <div class="pt-8">
+                        <a href="/test-dashboard" class="block w-full text-center bg-[#1f2937] hover:bg-gray-700 text-gray-200 text-xs font-bold py-3 rounded-xl transition border border-gray-700">Hubungi Sales</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800/60 bg-[#05080f] py-8 px-8 text-center text-xs text-gray-500">
+        <p>© 2026 AMAHAY Tenant Pro. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
                     @else
                         <a
                             href="{{ route('login') }}"
