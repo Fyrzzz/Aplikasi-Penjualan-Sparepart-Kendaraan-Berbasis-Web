@@ -25,9 +25,9 @@
                 <!-- Menu Navigasi -->
                 <nav class="hidden md:flex items-center space-x-6 text-xs text-gray-400">
                     <a href="#" class="text-blue-400 font-medium">Cari Bengkel</a>
-                    <a href="#" class="hover:text-white transition">Cek Status Servis</a>
-                    <a href="#" class="hover:text-white transition">Promo</a>
-                    <a href="#" class="hover:text-white transition">Riwayat</a>
+                    <a href="{{ route('user.cek.servis') }}" class="hover:text-white transition">Cek Status Servis</a>
+                    <a href="{{ route('user.promo') }}" class="hover:text-white transition">Promo</a>
+                    <a href="{{ route('user.riwayat') }}" class="hover:text-white transition">Riwayat</a>
                 </nav>
             </div>
             <!-- User Profile Pill -->
@@ -85,9 +85,10 @@
                             <p class="text-[11px] text-gray-500">Estimasi waktu tunggu: ± 15 mnt</p>
                         </div>
                     </div>
-                    <button class="w-full bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
-                        Lihat Detail & Booking
-                    </button>
+                <!-- Contoh pada card bengkel -->
+                <a href="{{ url('/user-menu/bengkel/bengkel-maju-jaya') }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                    Lihat Detail & Booking
+                </a>
                 </div>
 
                 <!-- Card 2 -->

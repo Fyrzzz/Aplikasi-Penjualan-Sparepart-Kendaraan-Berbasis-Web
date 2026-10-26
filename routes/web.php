@@ -27,6 +27,26 @@ Route::get('/user-menu', function () {
     return view('user-menu');
 })->name('user.menu');
 
+// Halaman Detail & Booking Bengkel
+Route::get('/user-menu/bengkel/{id}', function ($id) {
+    return view('bengkel.detail', ['bengkel_id' => $id]);
+})->name('user.bengkel.detail');
+
+// Halaman Cek Status Servis Konsumen
+Route::get('/user-menu/cek-servis', function () {
+    return view('bengkel.cek-servis');
+})->name('user.cek.servis');
+
+// Halaman Promo Publik
+Route::get('/user-menu/promo', function () {
+    return view('bengkel.promo');
+})->name('user.promo');
+
+// Halaman Riwayat Servis Konsumen
+Route::get('/user-menu/riwayat', function () {
+    return view('bengkel.riwayat');
+})->name('user.riwayat');
+
 
 /*
 |--------------------------------------------------------------------------
