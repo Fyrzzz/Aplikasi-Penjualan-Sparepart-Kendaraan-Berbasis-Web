@@ -29,7 +29,7 @@
         </div>
 
         <!-- Form Register -->
-        <form action="/test-dashboard" method="POST" class="space-y-4 text-xs">
+       <form action="{{ route('owner.home') }}" method="GET">
             @csrf
 
             <!-- Nama Bengkel Anda -->

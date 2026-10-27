@@ -4,132 +4,156 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC
+| AREA PUBLIK & AUTENTIKASI
 |--------------------------------------------------------------------------
 */
 
 // Landing Page Publik
 Route::get('/', function () {
-    return view('landing-bengkel');
+    return view('bengkel.landing-bengkel');
 })->name('home');
 
-// Login Publik
+// Halaman Login & Register Publik
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
 Route::get('/register', function () {
     return view('auth.register');
-});
+})->name('register');
 
-// Halaman User Menu / Cari Bengkel untuk Konsumen Publik
-Route::get('/user-menu', function () {
-    return view('user-menu');
-})->name('user.menu');
-
-// Halaman Detail & Booking Bengkel
-Route::get('/user-menu/bengkel/{id}', function ($id) {
-    return view('bengkel.detail', ['bengkel_id' => $id]);
-})->name('user.bengkel.detail');
-
-// Halaman Cek Status Servis Konsumen
-Route::get('/user-menu/cek-servis', function () {
-    return view('bengkel.cek-servis');
-})->name('user.cek.servis');
-
-// Halaman Promo Publik
-Route::get('/user-menu/promo', function () {
-    return view('bengkel.promo');
-})->name('user.promo');
-
-// Halaman Riwayat Servis Konsumen
-Route::get('/user-menu/riwayat', function () {
-    return view('bengkel.riwayat');
-})->name('user.riwayat');
-
-
-/*
-|--------------------------------------------------------------------------
-| TENANT
-|--------------------------------------------------------------------------
-*/
-
-// Login Tenant
+// Rute Bawaan Tenant/Superadmin (Diarahkan ke login utama)
 Route::get('/tenant/login', function () {
-    return view('auth.login');
+    return view('auth.login'); 
 })->name('tenant.login');
 
-
-/*
-|--------------------------------------------------------------------------
-| SUPERADMIN
-|--------------------------------------------------------------------------
-*/
-
-// Login Superadmin
 Route::get('/superadmin/login', function () {
-    return view('auth.login');
+    return view('auth.login'); 
 })->name('superadmin.login');
 
+// Proses Login Pintar (Mendeteksi 3 Peran Berdasarkan Email)
+Route::post('/login', function (\Illuminate\Http\Request $request) {
+    $email = strtolower($request->input('email')); // Ubah ke huruf kecil agar aman
+
+    // 1. Cek Superadmin
+    if ($email === 'soutakitagawa307@gmail.com' || str_contains($email, 'admin')) {
+        return redirect()->route('superadmin.home');
+    }
+
+    // 2. Cek Owner / Tenant Bengkel
+    if (str_contains($email, 'owner') || str_contains($email, 'bengkel') || str_contains($email, 'tenant') || str_contains($email, 'kasir')) {
+        return redirect()->route('owner.home');
+    }
+
+    // 3. Konsumen Umum / User (Jika tidak ada kata admin/owner/bengkel/tenant/kasir)
+    return redirect()->route('user.menu');
+})->name('login.proses');
+
 
 /*
 |--------------------------------------------------------------------------
-| TESTING
+| AREA KONSUMEN / PENGGUNA BENGKEL
 |--------------------------------------------------------------------------
 */
+Route::prefix('user-menu')->name('user.')->group(function () {
+    
+    // Halaman Menu Utama Konsumen
+    Route::get('/', function () {
+        return view('bengkel.user-menu');
+    })->name('menu');
 
-Route::match(['get', 'post'], '/test-login', function () {
-    if (request()->isMethod('post')) {
-        return view('dashboard');
-    }
+    // Halaman Detail Bengkel
+    Route::get('/bengkel/{id}', function ($id) {
+        return view('bengkel.detail', ['bengkel_id' => $id]);
+    })->name('bengkel.detail');
 
-    return view('auth.login');
+    // Halaman Cek Servis
+    Route::get('/cek-servis', function () {
+        return view('bengkel.cek-servis');
+    })->name('cek.servis');
+
+    // Halaman Promo
+    Route::get('/promo', function () {
+        return view('bengkel.promo');
+    })->name('promo');
+
+    // Halaman Profil & Motor
+    Route::get('/riwayat', function () {
+        return view('bengkel.riwayat');
+    })->name('riwayat');
+
+    // Halaman Edit Profil & Motor
+    Route::get('/profil/edit', function () {
+        return view('bengkel.edit-profil');
+    })->name('profil.edit');
+
 });
 
-Route::get('/test-dashboard', function () {
-    return view('dashboard');
+
+/*
+|--------------------------------------------------------------------------
+| AREA OWNER BENGKEL (TENANT)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('owner')->name('owner.')->group(function () {
+    
+    Route::get('/dashboard', function () {
+        return view('tenant.dashboard');
+    })->name('home');
+
+    Route::get('/antrean', function () {
+        return view('tenant.antrean');
+    })->name('antrean');
+
+    Route::get('/kasir', function () {
+        return view('tenant.kasir');
+    })->name('kasir');
+
+    Route::get('/stok', function () {
+        return view('tenant.stok');
+    })->name('stok');
+
+    Route::get('/mekanik', function () {
+        return view('tenant.mekanik');
+    })->name('mekanik');
+
+    Route::get('/pengingat', function () {
+        return view('tenant.pengingat');
+    })->name('pengingat');
+
 });
 
 
-// Tenant
-Route::get('/test-antrean', function () {
-    return view('tenant.antrean');
-});
+/*
+|--------------------------------------------------------------------------
+| AREA SUPER ADMIN
+|--------------------------------------------------------------------------
+*/
+Route::prefix('superadmin')->name('superadmin.')->group(function () {
 
-Route::get('/test-kasir', function () {
-    return view('tenant.kasir');
-});
+    // Halaman Utama / Dashboard Superadmin (Diarahkan ke dashboard-global)
+    Route::get('/dashboard', function () {
+        return view('superadmin.dashboard-global');
+    })->name('home');
 
-Route::get('/test-stok', function () {
-    return view('tenant.stok');
-});
+    // Manajemen Tenant / Bengkel (Diarahkan ke dashboardsuperadmin)
+    Route::get('/tenant', function () {
+        return view('superadmin.dashboardsuperadmin');
+    })->name('tenant');
 
-Route::get('/test-mekanik', function () {
-    return view('tenant.mekanik');
-});
+    // Laporan Global
+    Route::get('/laporan', function () {
+        return view('superadmin.laporan');
+    })->name('laporan');
 
-Route::get('/test-pengingat', function () {
-    return view('tenant.pengingat');
-});
+    // Manajemen Paket
+    Route::get('/paket', function () {
+        return view('superadmin.paket');
+    })->name('paket');
 
+    // Pengaturan Sistem
+    Route::get('/pengaturan', function () {
+        return view('superadmin.pengaturan');
+    })->name('pengaturan');
 
-// Superadmin (Disinkronkan ke view dashboardsuperadmin)
-Route::get('/test-superadmin-dashboard', function () {
-    return view('superadmin.dashboard-global');
-});
-
-Route::get('/test-superadmin', function () {
-    return view('superadmin.dashboardsuperadmin');
-});
-
-Route::get('/test-superadmin-laporan', function () {
-    return view('superadmin.laporan');
-});
-
-Route::get('/test-superadmin-paket', function () {
-    return view('superadmin.paket');
-});
-
-Route::get('/test-superadmin-pengaturan', function () {
-    return view('superadmin.pengaturan');
 });
