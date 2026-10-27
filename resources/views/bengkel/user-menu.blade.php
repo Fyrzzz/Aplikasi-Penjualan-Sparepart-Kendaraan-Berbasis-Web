@@ -30,11 +30,30 @@
                     <a href="{{ route('user.riwayat') }}" class="hover:text-white transition">Riwayat</a>
                 </nav>
             </div>
-            <!-- User Profile Pill -->
-            <div class="flex items-center space-x-2 bg-[#161e2e] border border-gray-800 px-3 py-1.5 rounded-full text-xs">
-                <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center font-bold text-white">N</div>
-                <span class="text-gray-200 font-medium">Nadira</span>
-                <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+
+            <!-- User Profile dengan Dropdown Klik -->
+            <div class="relative">
+                <!-- Tombol Profile -->
+                <button onclick="toggleDropdown()" 
+                    class="flex items-center space-x-2 bg-[#161e2e] border border-gray-800 px-3 py-1.5 rounded-full text-xs cursor-pointer hover:border-gray-700 transition focus:outline-none">
+                    <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center font-bold text-white">P</div>
+                    <span class="text-gray-200 font-medium">Panda</span>
+                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <!-- Kotak Menu Dropdown (Awalnya tersembunyi dengan class 'hidden') -->
+                <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-[#111827] border border-gray-800 rounded-2xl shadow-xl py-2 hidden z-50 text-xs">
+                    <div class="px-4 py-2 border-b border-gray-800/80">
+                        <p class="font-bold text-white">Panda</p>
+                        <p class="text-[10px] text-gray-400">panda@gmail.com</p>
+                    </div>
+                    <a href="{{ route('user.profil.edit') }}" class="block px-4 py-2 text-gray-300 hover:bg-[#1f2937] hover:text-white transition">⚙️ Edit Profil & Motor</a>
+                    <a href="{{ route('user.riwayat') }}" class="block px-4 py-2 text-gray-300 hover:bg-[#1f2937] hover:text-white transition">📜 Riwayat Servis Saya</a>
+                    <div class="border-t border-gray-800/80 my-1"></div>
+                    <a href="{{ route('home') }}" class="block px-4 py-2 text-red-400 hover:bg-red-500/10 transition font-medium">🚪 Keluar (Logout)</a>
+                </div>
             </div>
         </header>
 
@@ -85,10 +104,9 @@
                             <p class="text-[11px] text-gray-500">Estimasi waktu tunggu: ± 15 mnt</p>
                         </div>
                     </div>
-                <!-- Contoh pada card bengkel -->
-                <a href="{{ url('/user-menu/bengkel/bengkel-maju-jaya') }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
-                    Lihat Detail & Booking
-                </a>
+                    <a href="{{ url('/user-menu/bengkel/bengkel-maju-jaya') }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                        Lihat Detail & Booking
+                    </a>
                 </div>
 
                 <!-- Card 2 -->
@@ -108,9 +126,9 @@
                             <p class="text-[11px] text-gray-500">Estimasi waktu tunggu: ± 25 mnt</p>
                         </div>
                     </div>
-                    <button class="w-full bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                    <a href="{{ url('/user-menu/bengkel/abadi-motor') }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
                         Lihat Detail & Booking
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Card 3 -->
@@ -130,9 +148,9 @@
                             <p class="text-[11px] text-gray-500">Estimasi waktu tunggu: ± 10 mnt</p>
                         </div>
                     </div>
-                    <button class="w-full bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                    <a href="{{ url('/user-menu/bengkel/bengkel-terangjaya-mtr') }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
                         Lihat Detail & Booking
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Card 4 -->
@@ -152,9 +170,9 @@
                             <p class="text-[11px] text-gray-500">Estimasi waktu tunggu: ± 10 mnt</p>
                         </div>
                     </div>
-                    <button class="w-full bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                    <a href="{{ url('/user-menu/bengkel/satria-speed-workshop') }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
                         Lihat Detail & Booking
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Card 5 -->
@@ -174,9 +192,9 @@
                             <p class="text-[11px] text-gray-500">Estimasi waktu tunggu: ± 30 mnt</p>
                         </div>
                     </div>
-                    <button class="w-full bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                    <a href="{{ url('/user-menu/bengkel/bintang-motor-24jam') }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
                         Lihat Detail & Booking
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Card 6 -->
@@ -196,9 +214,9 @@
                             <p class="text-[11px] text-gray-500">Estimasi waktu tunggu: ± 5 mnt</p>
                         </div>
                     </div>
-                    <button class="w-full bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                    <a href="{{ url('/user-menu/bengkel/garasi-matic-express') }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
                         Lihat Detail & Booking
-                    </button>
+                    </a>
                 </div>
 
             </div>
@@ -210,6 +228,23 @@
         <span>© AMAHAY 2026</span>
         <span>SaaS Manajemen Bengkel & Konsumen Portal</span>
     </footer>
+
+    <!-- Script untuk Toggle Dropdown Klik -->
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById('profile-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Menutup dropdown jika pengguna mengklik di luar area menu
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('profile-dropdown');
+            const button = dropdown.previousElementSibling;
+            if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
 
 </body>
 </html>

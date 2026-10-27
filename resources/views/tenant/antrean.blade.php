@@ -25,29 +25,29 @@
                 </div>
             </div>
 
-            <!-- Menu Sidebar (Sudah diarahkan ke /test-mekanik) -->
+            <!-- Menu Sidebar (Sudah diarahkan ke /owner/mekanik) -->
             <nav class="p-4 space-y-1.5 text-xs">
-                <a href="/test-dashboard" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
+                <a href="/owner/dashboard" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
                     <span>📊</span>
                     <span>Dashboard</span>
                 </a>
-                <a href="/test-antrean" class="flex items-center space-x-3 px-4 py-2.5 bg-[#1f2937] text-white rounded-xl font-medium shadow-sm border border-gray-700/50">
+                <a href="/owner/antrean" class="flex items-center space-x-3 px-4 py-2.5 bg-[#1f2937] text-white rounded-xl font-medium shadow-sm border border-gray-700/50">
                     <span>🛠️</span>
                     <span>Antrean Service</span>
                 </a>
-                <a href="/test-kasir" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
+                <a href="/owner/kasir" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
                     <span>💰</span>
                     <span>Kasir / POS</span>
                 </a>
-                <a href="/test-stok" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
+                <a href="/owner/stok" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
                     <span>📦</span>
                     <span>Stok Sparepart</span>
                 </a>
-                <a href="/test-mekanik" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
+                <a href="/owner/mekanik" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
                     <span>👥</span>
                     <span>Pelanggan & Mekanik</span>
                 </a>
-                <a href="/test-pengingat" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
+                <a href="/owner/pengingat" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
                     <span>🔔</span>
                     <span>Pengingat Service</span>
                 </a>
