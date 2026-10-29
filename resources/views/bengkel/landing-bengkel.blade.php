@@ -833,7 +833,7 @@
                 <a href="#fitur" class="hover:text-white transition">Fitur</a>
                 <a href="#cara-kerja" class="hover:text-white transition">Cara Kerja</a>
                 <a href="#paket" class="hover:text-white transition">Paket</a>
-                <a href="/user-menu" class="text-blue-400 hover:underline">Cari Bengkel Publik</a>
+               <a href="{{ route('login') }}" class="hover:text-white transition">Cari Bengkel Publik</a>
             </nav>
 
             <!-- Auth Buttons -->
