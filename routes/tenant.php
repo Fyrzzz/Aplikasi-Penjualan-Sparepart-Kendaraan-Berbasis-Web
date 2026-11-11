@@ -3,27 +3,45 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OwnerDashboardController;
+use App\Http\Controllers\OwnerOperationsController;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 /*
 |--------------------------------------------------------------------------
-| Tenant Routes
+| TENANT ROUTES (Khusus untuk masing-masing Bengkel)
 |--------------------------------------------------------------------------
-|
-| Here you can register the tenant routes for your application.
-| These routes are loaded by the TenantRouteServiceProvider.
-|
-| Feel free to customize them however you want. Good luck!
-|
 */
 
 Route::middleware([
     'web',
+    'auth',
+    'role:Owner,Kasir,Mekanik',
     InitializeTenancyByDomain::class,
-    PreventAccessFromCentralDomains::class,
+    PreventAccessFromCentralDomains::class, // Pelindung tenant sudah diaktifkan kembali
 ])->group(function () {
-    Route::get('/', function () {
-        return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
-    });
+
+    // ==========================================
+    // AREA MANAJEMEN INTERNAL BENGKEL
+    // ==========================================
+
+    // Dashboard Admin Bengkel (Pemilik Bengkel)
+    Route::get('/dashboard-bengkel', OwnerDashboardController::class)->name('tenant.dashboard');
+
+    // Manajemen Antrean Kendaraan
+    Route::get('/antrean', [OwnerOperationsController::class, 'queue'])->name('tenant.antrean');
+
+    // Kasir & Pembayaran
+    Route::get('/kasir', [OwnerOperationsController::class, 'pos'])->name('tenant.kasir');
+
+    // Manajemen Stok / Sparepart
+    Route::get('/stok', [OwnerOperationsController::class, 'stock'])->name('tenant.stok');
+
+    // Manajemen Mekanik
+    Route::get('/mekanik', [OwnerOperationsController::class, 'people'])->name('tenant.mekanik');
+
+    // Pengingat Servis
+    Route::get('/pengingat', [OwnerOperationsController::class, 'reminders'])->name('tenant.pengingat');
+
 });

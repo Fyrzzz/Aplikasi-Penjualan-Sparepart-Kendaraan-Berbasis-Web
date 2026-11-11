@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promo Bengkel - AMAHAY</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#0b0f19] text-gray-200 min-h-screen font-sans flex flex-col justify-between">
+
+    <div>
+        <!-- Navbar Atas -->
+        <header
+            class="border-b border-gray-800/80 bg-[#0b0f19]/80 backdrop-blur sticky top-0 z-50 flex items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4">
+            <div class="flex min-w-0 items-center gap-2 sm:gap-4">
+                <a href="{{ route('user.menu') }}"
+                    class="text-xs bg-[#161e2e] border border-gray-800 px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition">
+                    ← Kembali ke Menu
+                </a>
+                <span class="text-sm font-bold text-white hidden md:inline">Promo & Voucher Spesial</span>
+            </div>
+            <!-- User Profile Pill -->
+            <div class="relative">
+                <button onclick="toggleDropdown()"
+                    class="flex max-w-[45vw] shrink-0 items-center space-x-2 bg-[#161e2e] border border-gray-800 px-3 py-1.5 rounded-full text-xs cursor-pointer hover:border-gray-700 transition focus:outline-none">
+                    <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center font-bold text-white">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                    <span class="max-w-[25vw] truncate text-gray-200 font-medium">{{ auth()->user()->name }}</span>
+                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <div id="profile-dropdown"
+                    class="absolute right-0 mt-2 w-48 bg-[#111827] border border-gray-800 rounded-2xl shadow-xl py-2 hidden z-50 text-xs">
+                    <div class="px-4 py-2 border-b border-gray-800/80">
+                        <p class="font-bold text-white">{{ auth()->user()->name }}</p>
+                        <p class="text-[10px] text-gray-400">{{ auth()->user()->phone ?: auth()->user()->email }}</p>
+                    </div>
+                   <a href="{{ route('user.profil.edit') }}" class="block px-4 py-2 text-gray-300 hover:bg-[#1f2937] hover:text-white transition">⚙️ Edit Profil & Motor</a>
+                    <a href="{{ route('user.riwayat') }}"
+                        class="block px-4 py-2 text-gray-300 hover:bg-[#1f2937] hover:text-white transition">📜 Riwayat
+                        Servis Saya</a>
+                    <div class="border-t border-gray-800/80 my-1"></div>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="block w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/10 transition font-medium">🚪 Keluar (Logout)</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <nav aria-label="Navigasi konsumen" class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-800/80 px-4 py-2 text-xs text-gray-400">
+            <a href="{{ route('user.menu') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Cari Bengkel</a>
+            <a href="{{ route('user.cek.servis') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Cek Status</a>
+            <a href="{{ route('user.promo') }}" class="shrink-0 rounded-lg bg-[#161e2e] px-3 py-2 text-blue-400">Promo</a>
+            <a href="{{ route('user.riwayat') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Riwayat</a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto px-4 py-8 sm:px-6 sm:py-10">
+
+            <div class="text-center mb-10">
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Promo Servis & Sparepart Motor</h1>
+                <p class="text-xs text-gray-400">Nikmati potongan harga menarik dan cashback khusus pengguna platform
+                    AMAHAY.</p>
+            </div>
+
+            <!-- Grid Promo Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Promo 1 -->
+                <div
+                    class="bg-[#111827] border border-gray-800/80 rounded-2xl p-5 shadow-lg flex flex-col justify-between relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">
+                        DISKON 25%
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 mb-1 block">Bengkel Maju Jaya</span>
+                        <h3 class="text-sm font-bold text-white mb-2">Paket Ganti Oli + Tune Up</h3>
+                        <p class="text-xs text-gray-400 mb-4">Dapatkan gratis pembersihan injektor setiap pengambilan
+                            paket servis lengkap.</p>
+                        <div class="text-xs text-blue-400 font-medium mb-4">🕒 Berlaku s.d. 30 April 2026</div>
+                    </div>
+                    <button
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-xs transition shadow-md shadow-blue-600/30">
+                        Klaim Voucher 🎟️
+                    </button>
+                </div>
+
+                <!-- Promo 2 -->
+                <div
+                    class="bg-[#111827] border border-gray-800/80 rounded-2xl p-5 shadow-lg flex flex-col justify-between relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">
+                        CASHBACK 15K
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 mb-1 block">Abadi Motor</span>
+                        <h3 class="text-sm font-bold text-white mb-2">Spesial Servis CVT Matik</h3>
+                        <p class="text-xs text-gray-400 mb-4">Tarikan motor lebih enteng dengan grease dan pembersihan
+                            CVT standar pabrik.</p>
+                        <div class="text-xs text-blue-400 font-medium mb-4">🕒 Berlaku s.d. 15 Mei 2026</div>
+                    </div>
+                    <button
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-xs transition shadow-md shadow-blue-600/30">
+                        Klaim Voucher 🎟️
+                    </button>
+                </div>
+
+                <!-- Promo 3 -->
+                <div
+                    class="bg-[#111827] border border-gray-800/80 rounded-2xl p-5 shadow-lg flex flex-col justify-between relative overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 bg-yellow-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">
+                        BUNDLE DEAL
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 mb-1 block">Satria Speed Workshop</span>
+                        <h3 class="text-sm font-bold text-white mb-2">Paket Rantai & Kampas Rem</h3>
+                        <p class="text-xs text-gray-400 mb-4">Potongan harga langsung untuk pembelian suku cadang asli
+                            dan ongkos pasang.</p>
+                        <div class="text-xs text-blue-400 font-medium mb-4">🕒 Kuota Terbatas</div>
+                    </div>
+                    <button
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-xs transition shadow-md shadow-blue-600/30">
+                        Klaim Voucher 🎟️
+                    </button>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer
+        class="border-t border-gray-800/80 py-4 px-6 text-center text-[11px] text-gray-500 flex justify-between max-w-6xl mx-auto w-full mt-12">
+        <span>© AMAHAY 2026</span>
+        <span>SaaS Manajemen Bengkel & Konsumen Portal</span>
+    </footer>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById('profile-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('profile-dropdown');
+            const button = dropdown.previousElementSibling;
+            if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>
