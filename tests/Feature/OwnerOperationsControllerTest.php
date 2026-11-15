@@ -394,6 +394,7 @@ class OwnerOperationsControllerTest extends TestCase
 
             $this->actingAs($cashier)
                 ->post(route('owner.kasir.checkout'), [
+                    'checkout_idempotency_key' => '6f8d7e55-7d88-4ee2-8b78-8ff3b9fcce01',
                     'customer_id' => $catalog['customerId'],
                     'payment_method' => 'cash',
                     'amount_paid' => 250000,
@@ -465,6 +466,7 @@ class OwnerOperationsControllerTest extends TestCase
 
             $this->actingAs($cashier)
                 ->post(route('owner.kasir.checkout'), [
+                    'checkout_idempotency_key' => '7268820c-79c3-4fdb-bf66-45a1e448d415',
                     'payment_method' => 'cash',
                     'amount_paid' => 50000,
                     'parts' => [$partId],

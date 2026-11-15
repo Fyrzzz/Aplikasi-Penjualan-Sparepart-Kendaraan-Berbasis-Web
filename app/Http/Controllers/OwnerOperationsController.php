@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tenant;
+use App\Services\Payments\Exceptions\GatewayUnavailableException;
+use App\Services\Payments\PaymentService;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -92,16 +95,23 @@ class OwnerOperationsController extends Controller
 
         return view('tenant.kasir', [
             'tenantName' => $tenant->getAttribute('tenant_name'),
+            'checkoutIdempotencyKey' => (string) Str::uuid(),
             ...$data,
         ]);
     }
 
-    public function checkout(Request $request): RedirectResponse
+    public function checkout(Request $request, PaymentService $paymentService): RedirectResponse
     {
         $validated = $request->validate([
+            'checkout_idempotency_key' => ['required', 'uuid'],
             'customer_id' => ['nullable', 'integer'],
             'payment_method' => ['required', Rule::in(['cash', 'transfer', 'qris'])],
-            'amount_paid' => ['required', 'numeric', 'min:0'],
+            'amount_paid' => ['nullable', 'required_if:payment_method,cash,transfer', 'numeric', 'min:0'],
+            'bank_code' => [
+                Rule::requiredIf($request->input('payment_method') === 'transfer'),
+                'nullable',
+                Rule::in(array_keys(config('services.bank_transfer.banks', []))),
+            ],
             'parts' => ['nullable', 'array', 'max:40'],
             'parts.*' => ['integer'],
             'part_quantities' => ['nullable', 'array'],
@@ -109,162 +119,302 @@ class OwnerOperationsController extends Controller
             'services' => ['nullable', 'array', 'max:40'],
             'services.*' => ['integer'],
         ]);
+        $paymentMethod = $validated['payment_method'];
+        if ($paymentMethod === 'qris' && ! config('services.qris.sandbox_enabled')) {
+            throw ValidationException::withMessages([
+                'payment_method' => 'Pembayaran QRIS belum dikonfigurasi untuk lingkungan ini.',
+            ]);
+        }
+
+        $checkoutIdempotencyKey = $validated['checkout_idempotency_key'];
+        $payloadForHash = [
+            'customer_id' => $validated['customer_id'] ?? null,
+            'payment_method' => $paymentMethod,
+            'amount_paid' => $paymentMethod === 'qris'
+                ? null
+                : number_format((float) $validated['amount_paid'], 2, '.', ''),
+            'bank_code' => $validated['bank_code'] ?? null,
+            'parts' => collect($validated['parts'] ?? [])
+                ->map(fn ($partId): int => (int) $partId)
+                ->sort()
+                ->values()
+                ->all(),
+            'part_quantities' => collect($validated['part_quantities'] ?? [])
+                ->map(fn ($quantity): int => (int) $quantity)
+                ->sortKeys()
+                ->all(),
+            'services' => collect($validated['services'] ?? [])
+                ->map(fn ($serviceId): int => (int) $serviceId)
+                ->unique()
+                ->sort()
+                ->values()
+                ->all(),
+        ];
+        $checkoutPayloadHash = hash('sha256', json_encode($payloadForHash, JSON_THROW_ON_ERROR));
         $tenant = $this->currentTenant();
 
-        $invoiceNumber = $tenant->run(function () use ($validated, $request): string {
-            return DB::transaction(function () use ($validated, $request): string {
-                $selectedParts = [];
-                foreach ($validated['parts'] ?? [] as $partId) {
-                    $selectedParts[$partId] = ($selectedParts[$partId] ?? 0)
-                        + (int) ($validated['part_quantities'][(string) $partId] ?? 1);
-                }
-                $selectedServices = array_unique($validated['services'] ?? []);
-
-                if ($selectedParts === [] && $selectedServices === []) {
-                    throw ValidationException::withMessages([
-                        'parts' => 'Pilih minimal satu sparepart atau jasa servis.',
-                    ]);
-                }
-
-                $customerId = $validated['customer_id'] ?? null;
-                if ($customerId !== null && ! DB::table('customers')->where('id', $customerId)->exists()) {
-                    throw ValidationException::withMessages([
-                        'customer_id' => 'Pelanggan tidak ditemukan di bengkel ini.',
-                    ]);
-                }
-
-                $lineItems = [];
-                foreach ($selectedParts as $partId => $quantity) {
-                    $part = DB::table('spare_parts')
-                        ->where('id', $partId)
-                        ->where('is_active', true)
-                        ->lockForUpdate()
+        try {
+            $checkout = $tenant->run(function () use (
+                $validated,
+                $request,
+                $paymentMethod,
+                $checkoutIdempotencyKey,
+                $checkoutPayloadHash,
+            ): array {
+                return DB::transaction(function () use (
+                    $validated,
+                    $request,
+                    $paymentMethod,
+                    $checkoutIdempotencyKey,
+                    $checkoutPayloadHash,
+                ): array {
+                    $existingSale = DB::table('sales')
+                        ->where('checkout_idempotency_key', $checkoutIdempotencyKey)
                         ->first();
 
-                    if ($part === null || (int) $part->stock < $quantity) {
+                    if ($existingSale !== null) {
+                        if (! hash_equals((string) $existingSale->checkout_payload_hash, $checkoutPayloadHash)) {
+                            throw ValidationException::withMessages([
+                                'checkout_idempotency_key' => 'Kunci checkout sudah digunakan untuk data transaksi lain.',
+                            ]);
+                        }
+
+                        $existingPayment = DB::table('payments')
+                            ->where('sale_id', $existingSale->id)
+                            ->first();
+                        abort_if($existingPayment === null, 500);
+
+                        return [
+                            'sale_id' => (int) $existingSale->id,
+                            'invoice_number' => $existingSale->invoice_number,
+                            'payment_id' => (int) $existingPayment->id,
+                            'payment_method' => $existingPayment->payment_method,
+                        ];
+                    }
+
+                    $selectedParts = [];
+                    foreach ($validated['parts'] ?? [] as $partId) {
+                        $selectedParts[$partId] = ($selectedParts[$partId] ?? 0)
+                            + (int) ($validated['part_quantities'][(string) $partId] ?? 1);
+                    }
+                    $selectedServices = array_unique($validated['services'] ?? []);
+                    ksort($selectedParts, SORT_NUMERIC);
+                    sort($selectedServices, SORT_NUMERIC);
+
+                    if ($selectedParts === [] && $selectedServices === []) {
                         throw ValidationException::withMessages([
-                            'parts' => 'Sparepart tidak tersedia atau stoknya tidak mencukupi.',
+                            'parts' => 'Pilih minimal satu sparepart atau jasa servis.',
                         ]);
                     }
 
-                    $lineItems[] = [
-                        'type' => 'part',
-                        'id' => $part->id,
-                        'name' => $part->name,
-                        'sku' => $part->sku,
-                        'quantity' => $quantity,
-                        'unit_price' => (float) $part->price,
-                    ];
-                }
-
-                foreach ($selectedServices as $serviceId) {
-                    $service = DB::table('service_catalog')
-                        ->where('id', $serviceId)
-                        ->where('is_active', true)
-                        ->first();
-
-                    if ($service === null) {
+                    $customerId = $validated['customer_id'] ?? null;
+                    if ($customerId !== null && ! DB::table('customers')->where('id', $customerId)->exists()) {
                         throw ValidationException::withMessages([
-                            'services' => 'Jasa servis yang dipilih tidak tersedia.',
+                            'customer_id' => 'Pelanggan tidak ditemukan di bengkel ini.',
                         ]);
                     }
 
-                    $lineItems[] = [
-                        'type' => 'service',
-                        'id' => $service->id,
-                        'name' => $service->name,
-                        'sku' => $service->service_code,
-                        'quantity' => 1,
-                        'unit_price' => (float) $service->price,
-                    ];
-                }
+                    $lineItems = [];
+                    foreach ($selectedParts as $partId => $quantity) {
+                        $part = DB::table('spare_parts')
+                            ->where('id', $partId)
+                            ->where('is_active', true)
+                            ->lockForUpdate()
+                            ->first();
 
-                $total = round(array_sum(array_map(
-                    fn (array $item): float => $item['unit_price'] * $item['quantity'],
-                    $lineItems,
-                )), 2);
-                $amountPaid = round((float) $validated['amount_paid'], 2);
+                        if ($part === null || (int) $part->stock < $quantity) {
+                            throw ValidationException::withMessages([
+                                'parts' => 'Sparepart tidak tersedia atau stoknya tidak mencukupi.',
+                            ]);
+                        }
 
-                if ($amountPaid < $total
-                    || ($validated['payment_method'] !== 'cash' && $amountPaid !== $total)) {
-                    throw ValidationException::withMessages([
-                        'amount_paid' => $validated['payment_method'] === 'cash'
-                            ? 'Jumlah pembayaran tunai kurang dari total transaksi.'
-                            : 'Untuk transfer dan QRIS, jumlah pembayaran harus sama dengan total transaksi.',
-                    ]);
-                }
+                        $lineItems[] = [
+                            'type' => 'part',
+                            'id' => $part->id,
+                            'name' => $part->name,
+                            'sku' => $part->sku,
+                            'quantity' => $quantity,
+                            'unit_price' => (float) $part->price,
+                        ];
+                    }
 
-                $now = now();
-                $invoiceNumber = 'INV-'.Str::upper((string) Str::ulid());
-                $saleId = DB::table('sales')->insertGetId([
-                    'invoice_number' => $invoiceNumber,
-                    'customer_id' => $customerId,
-                    'status' => 'completed',
-                    'subtotal' => $total,
-                    'discount' => 0,
-                    'tax' => 0,
-                    'total' => $total,
-                    'amount_paid' => $amountPaid,
-                    'change_due' => round($amountPaid - $total, 2),
-                    'sold_at' => $now,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
+                    foreach ($selectedServices as $serviceId) {
+                        $service = DB::table('service_catalog')
+                            ->where('id', $serviceId)
+                            ->where('is_active', true)
+                            ->first();
 
-                foreach ($lineItems as $item) {
-                    DB::table('sale_items')->insert([
-                        'sale_id' => $saleId,
-                        'spare_part_id' => $item['type'] === 'part' ? $item['id'] : null,
-                        'service_id' => $item['type'] === 'service' ? $item['id'] : null,
-                        'item_name' => $item['name'],
-                        'sku' => $item['sku'],
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $item['unit_price'],
+                        if ($service === null) {
+                            throw ValidationException::withMessages([
+                                'services' => 'Jasa servis yang dipilih tidak tersedia.',
+                            ]);
+                        }
+
+                        $lineItems[] = [
+                            'type' => 'service',
+                            'id' => $service->id,
+                            'name' => $service->name,
+                            'sku' => $service->service_code,
+                            'quantity' => 1,
+                            'unit_price' => (float) $service->price,
+                        ];
+                    }
+
+                    $total = round(array_sum(array_map(
+                        fn (array $item): float => $item['unit_price'] * $item['quantity'],
+                        $lineItems,
+                    )), 2);
+                    $amountPaid = $paymentMethod === 'qris'
+                        ? 0
+                        : round((float) $validated['amount_paid'], 2);
+
+                    if ($paymentMethod === 'qris'
+                        && ($total < 1 || round($total, 2) !== round($total, 0))) {
+                        throw ValidationException::withMessages([
+                            'amount_paid' => 'QRIS membutuhkan total transaksi berupa Rupiah bulat lebih dari nol.',
+                        ]);
+                    }
+
+                    if ($paymentMethod !== 'qris'
+                        && ($amountPaid < $total || ($paymentMethod !== 'cash' && $amountPaid !== $total))) {
+                        throw ValidationException::withMessages([
+                            'amount_paid' => $paymentMethod === 'cash'
+                                ? 'Jumlah pembayaran tunai kurang dari total transaksi.'
+                                : 'Jumlah transfer harus sama dengan total transaksi.',
+                        ]);
+                    }
+
+                    $now = now();
+                    $invoiceNumber = 'INV-'.Str::upper((string) Str::ulid());
+                    $saleId = DB::table('sales')->insertGetId([
+                        'invoice_number' => $invoiceNumber,
+                        'checkout_idempotency_key' => $checkoutIdempotencyKey,
+                        'checkout_payload_hash' => $checkoutPayloadHash,
+                        'customer_id' => $customerId,
+                        'status' => $paymentMethod === 'qris' ? 'pending' : 'completed',
+                        'subtotal' => $total,
                         'discount' => 0,
-                        'subtotal' => round($item['unit_price'] * $item['quantity'], 2),
+                        'tax' => 0,
+                        'total' => $total,
+                        'amount_paid' => $amountPaid,
+                        'change_due' => $paymentMethod === 'qris' ? 0 : round($amountPaid - $total, 2),
+                        'sold_at' => $paymentMethod === 'qris' ? null : $now,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]);
 
-                    if ($item['type'] === 'part') {
-                        $stockBefore = (int) DB::table('spare_parts')
-                            ->where('id', $item['id'])
-                            ->value('stock');
-                        $stockAfter = $stockBefore - $item['quantity'];
-                        DB::table('spare_parts')->where('id', $item['id'])->update([
-                            'stock' => $stockAfter,
-                            'updated_at' => $now,
-                        ]);
-                        DB::table('inventory_movements')->insert([
-                            'spare_part_id' => $item['id'],
-                            'movement_type' => 'sale',
+                    foreach ($lineItems as $item) {
+                        DB::table('sale_items')->insert([
+                            'sale_id' => $saleId,
+                            'spare_part_id' => $item['type'] === 'part' ? $item['id'] : null,
+                            'service_id' => $item['type'] === 'service' ? $item['id'] : null,
+                            'item_name' => $item['name'],
+                            'sku' => $item['sku'],
                             'quantity' => $item['quantity'],
-                            'stock_before' => $stockBefore,
-                            'stock_after' => $stockAfter,
-                            'reference_type' => 'sale',
-                            'reference_id' => $saleId,
-                            'central_user_id' => $request->user()->id,
+                            'unit_price' => $item['unit_price'],
+                            'discount' => 0,
+                            'subtotal' => round($item['unit_price'] * $item['quantity'], 2),
                             'created_at' => $now,
                             'updated_at' => $now,
                         ]);
+
+                        if ($item['type'] === 'part') {
+                            $stockBefore = (int) DB::table('spare_parts')
+                                ->where('id', $item['id'])
+                                ->value('stock');
+                            $stockAfter = $stockBefore - $item['quantity'];
+                            DB::table('spare_parts')->where('id', $item['id'])->update([
+                                'stock' => $stockAfter,
+                                'updated_at' => $now,
+                            ]);
+                            DB::table('inventory_movements')->insert([
+                                'spare_part_id' => $item['id'],
+                                'movement_type' => 'sale',
+                                'quantity' => $item['quantity'],
+                                'stock_before' => $stockBefore,
+                                'stock_after' => $stockAfter,
+                                'reference_type' => 'sale',
+                                'reference_id' => $saleId,
+                                'central_user_id' => $request->user()->id,
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ]);
+                        }
                     }
+
+                    $paymentId = DB::table('payments')->insertGetId([
+                        'sale_id' => $saleId,
+                        'payment_method' => $paymentMethod,
+                        'amount' => $total,
+                        'status' => $paymentMethod === 'qris' ? 'pending' : 'completed',
+                        'reference_number' => null,
+                        'paid_at' => $paymentMethod === 'qris' ? null : $now,
+                        'notes' => $paymentMethod === 'transfer'
+                            ? 'Bank pengirim: '.config('services.bank_transfer.banks.'.$validated['bank_code'])
+                            : null,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]);
+
+                    return [
+                        'sale_id' => $saleId,
+                        'invoice_number' => $invoiceNumber,
+                        'payment_id' => $paymentId,
+                        'payment_method' => $paymentMethod,
+                    ];
+                }, attempts: 3);
+            });
+        } catch (UniqueConstraintViolationException $exception) {
+            $checkout = $tenant->run(function () use (
+                $checkoutIdempotencyKey,
+                $checkoutPayloadHash,
+                $exception,
+            ): array {
+                $existingSale = DB::table('sales')
+                    ->where('checkout_idempotency_key', $checkoutIdempotencyKey)
+                    ->first();
+                if ($existingSale === null) {
+                    throw $exception;
                 }
 
-                DB::table('payments')->insert([
-                    'sale_id' => $saleId,
-                    'payment_method' => $validated['payment_method'],
-                    'amount' => $total,
-                    'status' => 'completed',
-                    'paid_at' => $now,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
+                if (! hash_equals((string) $existingSale->checkout_payload_hash, $checkoutPayloadHash)) {
+                    throw ValidationException::withMessages([
+                        'checkout_idempotency_key' => 'Kunci checkout sudah digunakan untuk data transaksi lain.',
+                    ]);
+                }
 
-                return $invoiceNumber;
+                $existingPayment = DB::table('payments')
+                    ->where('sale_id', $existingSale->id)
+                    ->first();
+                abort_if($existingPayment === null, 500);
+
+                return [
+                    'sale_id' => (int) $existingSale->id,
+                    'invoice_number' => $existingSale->invoice_number,
+                    'payment_id' => (int) $existingPayment->id,
+                    'payment_method' => $existingPayment->payment_method,
+                ];
             });
-        });
+        }
 
-        return redirect()->route('owner.kasir')->with('success', "Transaksi {$invoiceNumber} berhasil dicatat.");
+        if ($checkout['payment_method'] === 'qris') {
+            try {
+                $tenant->run(fn () => $paymentService->createQrisAttempt($checkout['payment_id']));
+            } catch (GatewayUnavailableException $exception) {
+                report($exception);
+
+                return redirect()
+                    ->route('owner.kasir.payment.show', ['invoice' => $checkout['invoice_number']])
+                    ->with('error', 'QRIS sandbox sedang mengalami gangguan. Coba buat tagihan kembali.');
+            }
+
+            return redirect()
+                ->route('owner.kasir.payment.show', ['invoice' => $checkout['invoice_number']])
+                ->with('success', 'Tagihan QRIS sandbox berhasil dibuat.');
+        }
+
+        return redirect()->route('owner.kasir')
+            ->with('success', "Transaksi {$checkout['invoice_number']} berhasil dicatat.");
     }
 
     public function stock(Request $request): View

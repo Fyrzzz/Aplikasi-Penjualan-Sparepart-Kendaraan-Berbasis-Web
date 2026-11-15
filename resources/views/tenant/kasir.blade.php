@@ -90,6 +90,7 @@
         <!-- Area Transaksi Layout 2 Kolom -->
         <form method="POST" action="{{ route('owner.kasir.checkout') }}" class="min-w-0 p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
             @csrf
+            <input type="hidden" name="checkout_idempotency_key" value="{{ old('checkout_idempotency_key', $checkoutIdempotencyKey) }}">
             <div class="lg:col-span-2 space-y-5">
                 @if (session('success'))
                     <p role="status" class="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-xs text-green-300">{{ session('success') }}</p>
@@ -158,17 +159,26 @@
                     </label>
                     <label class="block space-y-1 text-[10px] text-gray-400">
                         <span>Metode pembayaran</span>
-                        <select name="payment_method" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                        <select id="payment-method" name="payment_method" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             <option value="cash" @selected(old('payment_method', 'cash') === 'cash')>Tunai</option>
-                            <option value="transfer" @selected(old('payment_method') === 'transfer')>Transfer (dicatat manual)</option>
-                            <option value="qris" @selected(old('payment_method') === 'qris')>QRIS (dicatat manual)</option>
+                            <option value="transfer" @selected(old('payment_method') === 'transfer')>Transfer bank (konfirmasi kasir)</option>
+                            <option value="qris" @selected(old('payment_method') === 'qris')>QRIS Sandbox</option>
                         </select>
                     </label>
-                    <label class="block space-y-1 text-[10px] text-gray-400">
-                        <span>Jumlah diterima</span>
-                        <input type="number" name="amount_paid" min="0" step="0.01" value="{{ old('amount_paid') }}" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                    <label id="bank-code-field" hidden class="space-y-1 text-[10px] text-gray-400">
+                        <span>Bank pengirim</span>
+                        <select id="bank-code" name="bank_code" disabled class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                            <option value="">Pilih bank</option>
+                            @foreach (config('services.bank_transfer.banks') as $bankCode => $bankName)
+                                <option value="{{ $bankCode }}" @selected(old('bank_code') === $bankCode)>{{ $bankName }}</option>
+                            @endforeach
+                        </select>
                     </label>
-                    <p class="text-[10px] text-gray-500">Total dihitung ulang dari harga katalog dan stok saat transaksi disimpan.</p>
+                    <label id="amount-paid-field" class="block space-y-1 text-[10px] text-gray-400">
+                        <span>Jumlah diterima</span>
+                        <input id="amount-paid" type="number" name="amount_paid" min="0" step="0.01" value="{{ old('amount_paid') }}" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                    </label>
+                    <p id="payment-help" class="text-[10px] text-gray-500">Total dihitung ulang dari harga katalog dan stok saat transaksi disimpan.</p>
                     <button type="submit" class="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Simpan & Catat Pembayaran</button>
                 </section>
 
@@ -194,5 +204,34 @@
         </form>
     </main>
 
+    <script>
+        (() => {
+            const method = document.getElementById('payment-method');
+            const amount = document.getElementById('amount-paid');
+            const amountField = document.getElementById('amount-paid-field');
+            const bankField = document.getElementById('bank-code-field');
+            const bank = document.getElementById('bank-code');
+            const help = document.getElementById('payment-help');
+
+            const updatePaymentFields = () => {
+                const isQris = method.value === 'qris';
+                const isTransfer = method.value === 'transfer';
+                amountField.hidden = isQris;
+                amount.disabled = isQris;
+                amount.required = !isQris;
+                bankField.hidden = !isTransfer;
+                bank.disabled = !isTransfer;
+                bank.required = isTransfer;
+                help.textContent = isQris
+                    ? 'QRIS Sandbox membuat tagihan simulasi; tidak menerima pembayaran uang sungguhan.'
+                    : isTransfer
+                        ? 'Pilih bank dan catat pembayaran setelah transfer terverifikasi oleh kasir.'
+                        : 'Total dihitung ulang dari katalog. Pembayaran tunai dapat menyertakan uang kembalian.';
+            };
+
+            method.addEventListener('change', updatePaymentFields);
+            updatePaymentFields();
+        })();
+    </script>
 </body>
 </html>
