@@ -21,6 +21,8 @@ AMAHAY adalah aplikasi web untuk membantu bengkel mengelola operasional secara t
 - Database operasional dipisahkan untuk setiap tenant.
 - Dashboard berisi ringkasan berdasarkan data bengkel terkait.
 - Halaman antrean servis, kasir/POS, stok sparepart, pelanggan dan mekanik, serta pengingat servis.
+- Kasir mendukung tunai, transfer bank manual (BCA, BNI, BRI, Mandiri, dan BSI), serta QRIS sandbox dengan tagihan dinamis, masa berlaku 15 menit, dan simulasi status pembayaran.
+- QRIS saat ini hanya untuk pengujian dan tidak menerima uang sungguhan. Sandbox aktif secara default di lingkungan non-production dan tidak aktif di production; atur `QRIS_FAKE_ENABLED` secara eksplisit bila diperlukan.
 - Jam dan tanggal WIB di dashboard diperbarui secara real-time.
 - Menu operasional menyediakan navigasi yang dapat digunakan pada layar ponsel.
 
@@ -83,7 +85,7 @@ Jalankan seluruh tes:
 php artisan test
 ```
 
-Tes fitur mencakup alur autentikasi dan pendaftaran, isolasi data tenant, layanan konsumen, dan pengelolaan Super Admin.
+Tes fitur mencakup alur autentikasi dan pendaftaran, isolasi data tenant, pembayaran QRIS sandbox, layanan konsumen, dan pengelolaan Super Admin.
 
 ## Struktur direktori
 
@@ -91,7 +93,7 @@ Tes fitur mencakup alur autentikasi dan pendaftaran, isolasi data tenant, layana
 |---|---|
 | `app/Http/Controllers` | Controller autentikasi, konsumen, tenant, dan Super Admin |
 | `app/Http/Middleware` | Middleware role dan status tenant |
-| `app/Services` | Layanan metrik agregat tenant |
+| `app/Services` | Layanan metrik tenant dan gateway pembayaran QRIS |
 | `database/migrations` | Skema database pusat |
 | `database/migrations/tenant` | Skema operasional database tenant |
 | `resources/views` | Template Blade untuk halaman aplikasi |

@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerProfileController;
 use App\Http\Controllers\CustomerServiceController;
 use App\Http\Controllers\OwnerDashboardController;
 use App\Http\Controllers\OwnerOperationsController;
+use App\Http\Controllers\OwnerPaymentController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\SuperAdminProfileController;
 use App\Http\Controllers\TenantDirectoryController;
@@ -114,6 +115,26 @@ Route::middleware(['auth', 'role:Owner,Kasir,Mekanik', 'tenant.active'])->prefix
     Route::post('/kasir/checkout', [OwnerOperationsController::class, 'checkout'])
         ->middleware('role:Owner,Kasir')
         ->name('kasir.checkout');
+    Route::get('/kasir/{invoice}/pembayaran', [OwnerPaymentController::class, 'show'])
+        ->middleware('role:Owner,Kasir')
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('kasir.payment.show');
+    Route::post('/kasir/{invoice}/qris', [OwnerPaymentController::class, 'create'])
+        ->middleware('role:Owner,Kasir')
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('kasir.payment.create');
+    Route::post('/kasir/{invoice}/qris/simulasi', [OwnerPaymentController::class, 'simulate'])
+        ->middleware('role:Owner,Kasir')
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('kasir.payment.simulate');
+    Route::post('/kasir/{invoice}/qris/batal', [OwnerPaymentController::class, 'cancel'])
+        ->middleware('role:Owner,Kasir')
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('kasir.payment.cancel');
+    Route::get('/kasir/{invoice}/status-pembayaran', [OwnerPaymentController::class, 'status'])
+        ->middleware('role:Owner,Kasir')
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('kasir.payment.status');
     Route::post('/mekanik', [OwnerOperationsController::class, 'storeEmployee'])
         ->middleware('role:Owner')
         ->name('mekanik.store');

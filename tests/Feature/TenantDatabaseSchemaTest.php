@@ -42,6 +42,7 @@ class TenantDatabaseSchemaTest extends TestCase
                 'sales',
                 'sale_items',
                 'payments',
+                'payment_attempts',
                 'service_reminders',
             ] as $table) {
                 $this->assertTrue($schema->hasTable($table), "Missing tenant table: {$table}");
@@ -63,6 +64,8 @@ class TenantDatabaseSchemaTest extends TestCase
             ]));
             $this->assertTrue($schema->hasColumns('sales', [
                 'invoice_number',
+                'checkout_idempotency_key',
+                'checkout_payload_hash',
                 'customer_id',
                 'cashier_id',
                 'total',

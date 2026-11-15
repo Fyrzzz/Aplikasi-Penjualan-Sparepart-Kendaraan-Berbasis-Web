@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    'qris' => [
+        'sandbox_enabled' => env('QRIS_FAKE_ENABLED', env('APP_ENV', 'production') !== 'production'),
+        'fake_unavailable' => env('QRIS_FAKE_UNAVAILABLE', false),
+        'merchant_id' => env('QRIS_FAKE_MERCHANT_ID', 'ID.CO.AMAHAY.SANDBOX'),
+        'merchant_name' => env('QRIS_FAKE_MERCHANT_NAME', 'AMAHAY SANDBOX'),
+        'merchant_city' => env('QRIS_FAKE_MERCHANT_CITY', 'JAKARTA'),
+    ],
+
+    'bank_transfer' => [
+        'banks' => [
+            'bca' => 'BCA',
+            'bni' => 'BNI',
+            'bri' => 'BRI',
+            'mandiri' => 'Mandiri',
+            'bsi' => 'BSI',
+        ],
+    ],
+
 ];
