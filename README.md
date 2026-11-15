@@ -1,65 +1,78 @@
-# AMAHAY — Sistem Manajemen Bengkel
+# AMAHAY — Sistem Manajemen Bengkel & Sparepart Multi-Tenant
 
-AMAHAY adalah aplikasi web untuk membantu bengkel mengelola operasional secara terpisah per tenant. Aplikasi menyediakan akun konsumen, akun utama pemilik bengkel, dashboard operasional bengkel, dan panel Super Admin.
+AMAHAY adalah aplikasi web untuk mengelola operasional bengkel dan toko sparepart dalam arsitektur multi-tenant. Project ini menyiapkan satu platform pusat untuk pelanggan, owner bengkel, dan super admin dengan data operasional yang terpisah per tenant.
 
-> **Pembaruan dokumentasi:** November 2026
->
-> README ini merangkum fitur dan konfigurasi yang tersedia di kode proyek pada tanggal tersebut.
+> README ini diperbarui sesuai dengan kondisi proyek saat ini.
 
-## Fitur
+## Ringkasan proyek
 
-### Konsumen dan akun utama
+Aplikasi ini terdiri dari beberapa area utama:
 
-- Registrasi konsumen menggunakan username, nama, email atau nomor WhatsApp, password, dan konfirmasi password.
-- Login berdasarkan username, email, atau nomor WhatsApp serta logout.
-- Direktori dan pencarian bengkel yang terdaftar.
-- Halaman detail bengkel, promo, riwayat servis, dan pencarian status servis.
-- Akun utama dapat mendaftarkan satu tenant bengkel setelah login.
+- Area publik: landing page, login/register, katalog bengkel, promo, cek servis, dan profil pelanggan.
+- Area konsumen: pencarian bengkel, detail bengkel, riwayat servis, serta registrasi kendaraan dan profil pengguna.
+- Area owner/tenant: dashboard operasional, antrean kerja, kasir/POS, stok sparepart, mekanik, pelanggan, dan reminder servis.
+- Area super admin: dashboard global, moderasi tenant, laporan, distribusi paket, dan pengaturan sistem.
 
-### Operasional tenant bengkel
+## Fitur utama
 
-- Database operasional dipisahkan untuk setiap tenant.
-- Dashboard berisi ringkasan berdasarkan data bengkel terkait.
-- Halaman antrean servis, kasir/POS, stok sparepart, pelanggan dan mekanik, serta pengingat servis.
-- Kasir mendukung tunai, transfer bank manual (BCA, BNI, BRI, Mandiri, dan BSI), serta QRIS sandbox dengan tagihan dinamis, masa berlaku 15 menit, dan simulasi status pembayaran.
-- QRIS saat ini hanya untuk pengujian dan tidak menerima uang sungguhan. Sandbox aktif secara default di lingkungan non-production dan tidak aktif di production; atur `QRIS_FAKE_ENABLED` secara eksplisit bila diperlukan.
-- Jam dan tanggal WIB di dashboard diperbarui secara real-time.
-- Menu operasional menyediakan navigasi yang dapat digunakan pada layar ponsel.
+### 1. Konsumen dan autentikasi
 
-### Super Admin
+- Registrasi pengguna menggunakan username, nama, email atau nomor WhatsApp, password, dan konfirmasi password.
+- Login berbasis username, email, atau nomor WhatsApp.
+- Logout dan reset password berbasis token.
+- Direktori bengkel yang bisa dicari berdasarkan nama atau domain.
+- Halaman detail bengkel dan riwayat servis pelanggan.
+- Akun utama dapat membuat tenant bengkel setelah login.
 
-- Dashboard global, daftar tenant, laporan keuangan, distribusi paket, dan pengaturan platform.
-- Profil Super Admin dapat diperbarui.
-- Tenant dapat diaktifkan, dinonaktifkan, diblokir, atau dihapus permanen melalui panel moderasi.
-- Ringkasan keuangan dan aktivitas dihitung dari data tenant yang tersedia.
-- Estimasi paket bukan catatan pembayaran aktual.
-- Uptime server tidak ditampilkan sebagai persentase karena pemantauan uptime belum dikonfigurasi.
-- Jam dan tanggal dashboard memakai zona waktu Asia/Jakarta dan diperbarui setiap detik.
+### 2. Operasional tenant bengkel
 
-## Teknologi
+- Setiap tenant menggunakan database operasional yang terpisah.
+- Dashboard ringkasan berdasarkan data tenant terkait.
+- Antrean servis dan status pekerjaan.
+- Kasir/POS untuk transaksi tunai dan pembayaran non-tunai.
+- Manajemen stok sparepart dan level minimal stok.
+- Data pelanggan dan mekanik.
+- Reminder servis dengan periode jatuh tempo.
+- Navigasi operasional yang ramah untuk layar ponsel.
+
+### 3. Pembayaran dan QRIS sandbox
+
+- Kasir mendukung pembayaran tunai dan transfer bank manual (BCA, BNI, BRI, Mandiri, BSI).
+- Integrasi QRIS sandbox untuk simulasi pembayaran dinamis dengan tagihan 15 menit.
+- Status pembayaran dapat dimodelkan melalui simulator yang aman untuk pengujian.
+- Fitur QRIS dirancang untuk lingkungan pengujian dan bukan untuk menerima uang sungguhan.
+- Sandbox aktif secara default di lingkungan non-production, sedangkan production biasanya memerlukan konfigurasi eksplisit serta variabel seperti `QRIS_FAKE_ENABLED` sesuai kebutuhan.
+
+### 4. Super Admin
+
+- Dashboard global dan laporan data tenant.
+- Manajemen tenant: aktif, non-aktif, diblokir, atau dihapus.
+- Ringkasan keuangan dan aktivitas berdasarkan tenant yang tersedia.
+- Distribusi paket dan pengaturan platform.
+- Profil super admin dapat diperbarui.
+- Estimasi paket bersifat metrik platform, bukan catatan pembayaran sebenarnya.
+
+## Teknologi yang digunakan
 
 - PHP `^8.3`
 - Laravel `^13.17`
-- MySQL/MariaDB atau SQLite (sesuaikan konfigurasi database dan tenancy)
 - `stancl/tenancy` `^3.10`
-- Node.js dan npm
-- Vite 8 dan Tailwind CSS 4
-- PHPUnit 12
+- MySQL/MariaDB atau SQLite sesuai konfigurasi local dan tenant
+- Node.js + npm
+- Vite `^8`
+- Tailwind CSS `^4`
+- PHPUnit `^12`
+- `bacon/bacon-qr-code` untuk alur QRIS
 
-## Persiapan lokal
+## Persiapan local
 
-Pastikan PHP, Composer, Node.js, npm, dan database yang akan digunakan sudah tersedia. Dari PowerShell, jalankan di folder proyek:
+Pastikan PHP, Composer, Node.js, npm, dan database yang akan dipakai sudah tersedia. Kemudian jalankan perintah berikut dari root proyek:
+
+### Windows PowerShell
 
 ```powershell
 composer install
 Copy-Item .env.example .env
-```
-
-Atur `.env` sebelum migrasi. Untuk MySQL, isi setidaknya `APP_NAME`, `APP_URL`, `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD`. Buat database pusat terlebih dahulu. Kredensial `.env` bersifat lokal dan **jangan pernah di-commit**.
-
-Kemudian jalankan:
-
-```powershell
 php artisan key:generate
 php artisan migrate
 npm install
@@ -67,42 +80,77 @@ npm run build
 php artisan serve
 ```
 
-Buka alamat lokal yang dicetak oleh `php artisan serve` (biasanya `http://127.0.0.1:8000`).
+### Linux/macOS
 
-Untuk sistem operasi selain Windows, gunakan `cp .env.example .env` sebagai pengganti `Copy-Item`.
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+npm install
+npm run build
+php artisan serve
+```
 
-### Tenant dan domain
+Setelah `php artisan serve` berjalan, buka URL yang ditampilkan, biasanya:
 
-Tenancy menggunakan database terpisah dan konfigurasi database pusat yang sama. Saat tenant dibuat dari aplikasi, database operasionalnya disiapkan berdasarkan konfigurasi tenancy.
+```text
+http://127.0.0.1:8000
+```
 
-Subdomain pendaftaran saat ini menggunakan akhiran `.autozone.pro`. Agar subdomain bisa diakses di server, siapkan DNS wildcard dan konfigurasi web server/proxy untuk domain tersebut. Untuk domain lain, sesuaikan validasi dan pembuatan domain tenant di aplikasi serta konfigurasi tenancy.
+### Konfigurasi `.env`
+
+Sebelum migrasi, sesuaikan nilai di `.env` sesuai lingkungan Anda. Minimal untuk database local, biasanya diperlukan:
+
+```env
+APP_NAME=AMAHAY
+APP_ENV=local
+APP_URL=http://127.0.0.1:8000
+DB_CONNECTION=sqlite
+DB_DATABASE=/path/to/project/database/database.sqlite
+```
+
+Untuk setup MySQL, gunakan konfigurasi database seperti `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` sesuai server Anda.
+
+> `.env` bersifat lokal dan jangan pernah di-commit ke repository.
+
+## Multi-tenant dan domain
+
+Project ini menggunakan struktur multi-tenant dengan database pusat dan database operasional per tenant. Saat tenant dibuat dari aplikasi, database tenant akan dipersiapkan otomatis berdasarkan konfigurasi tenancy.
+
+Subdomain pendaftaran saat ini menggunakan akhiran `.autozone.pro`. Untuk environment server, pastikan wildcard DNS dan konfigurasi reverse proxy/web server sudah siap agar subdomain tenant bisa diakses. Jika memakai domain lain, sesuaikan validasi pembuatan domain tenant di codebase dan konfigurasi tenancy-nya.
+
+## Struktur direktori utama
+
+| Direktori | Keterangan |
+| --- | --- |
+| `app/Http/Controllers` | Controller login, customer, tenant, owner, dan super admin |
+| `app/Http/Middleware` | Middleware autentikasi dan validasi role/status tenant |
+| `app/Services` | Layanan metrik tenant dan gateway pembayaran QRIS |
+| `database/migrations` | Skema database pusat |
+| `database/migrations/tenant` | Skema database operasional per tenant |
+| `resources/views` | Blade template untuk landing page, dashboard, dan modul aplikasi |
+| `routes/web.php` | Rute aplikasi web |
+| `tests/Feature` | Test end-to-end untuk alur fungsional |
 
 ## Pengujian
 
-Jalankan seluruh tes:
+Untuk menjalankan seluruh test yang tersedia:
 
-```powershell
+```bash
 php artisan test
 ```
 
-Tes fitur mencakup alur autentikasi dan pendaftaran, isolasi data tenant, pembayaran QRIS sandbox, layanan konsumen, dan pengelolaan Super Admin.
+Tes yang ada mencakup autentikasi, registrasi, isolasi data tenant, pengelolaan super admin, dan simulasi pembayaran QRIS sandbox.
 
-## Struktur direktori
+## Catatan penting
 
-| Direktori | Isi |
-|---|---|
-| `app/Http/Controllers` | Controller autentikasi, konsumen, tenant, dan Super Admin |
-| `app/Http/Middleware` | Middleware role dan status tenant |
-| `app/Services` | Layanan metrik tenant dan gateway pembayaran QRIS |
-| `database/migrations` | Skema database pusat |
-| `database/migrations/tenant` | Skema operasional database tenant |
-| `resources/views` | Template Blade untuk halaman aplikasi |
-| `routes/web.php` | Rute aplikasi web |
-| `tests/Feature` | Tes alur dan fitur aplikasi |
+- Jangan mengunggah `.env`, token, dump database, atau data pelanggan ke repository.
+- Pastikan `git status` selalu dicek sebelum commit.
+- Hindari menjalankan seeder pada database yang berisi data nyata tanpa mengecek dulu isi `database/seeders/DatabaseSeeder.php`.
+- Sebelum menghapus tenant permanen, pastikan backup database tenant tersedia.
+- QRIS sandbox cocok untuk testing, bukan untuk transaksi nyata.
 
-## Keamanan dan data
+## Status proyek
 
-- Jangan unggah `.env`, password, token, dump database, atau data pelanggan ke repository.
-- `.env` dan `vendor/` dikecualikan oleh `.gitignore`; tetap periksa `git status` sebelum commit.
-- Jangan jalankan seeder pada database berisi data nyata tanpa meninjau isi `database/seeders/DatabaseSeeder.php` terlebih dahulu.
-- Pastikan backup database tenant tersedia sebelum melakukan penghapusan permanen tenant.
+Proyek ini sudah mencakup fitur inti bisnis untuk platform bengkel dan sparepart berbasis tenant, termasuk operasional bengkel, customer portal, dan panel pengelola platform. Pengembangan selanjutnya dapat ditambah sesuai kebutuhan bisnis dan integrasi gateway pembayaran produksi.
